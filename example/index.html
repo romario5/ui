@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo list</title>
+        <meta charset="UTF-8">
+        <script src="../dst/ui-builder.min.js"></script>
+        <script src="input.js"></script>
+        <script src="button.js"></script>
+        <script src="todo-list.js"></script>
+        <script src="task.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            html {
+                font-size: 16px;
+            }
+            #todo-list {
+                width: 30rem;
+                margin: 2rem auto;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="todo-list"></div>
+
+        <script>
+            let todoList = new TodoList();
+            todoList.appendTo('#todo-list');    
+        </script>
+    </body>
+</html>
