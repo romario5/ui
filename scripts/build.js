@@ -28,7 +28,7 @@ const inputOptions2 = {
 };
 const outputOptions2 = {
     file: './dst/export_ui-builder.min.js',
-    format: 'esm',
+    format: 'cjs',
     sourcemap: true
 };
 
