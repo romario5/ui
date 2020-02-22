@@ -16,9 +16,28 @@ const outputOptions = {
     sourcemap: true
 };
 
+
+// see below for details on the options
+const inputOptions2 = {
+    input: './src/export.js',
+    plugins: [
+        minify({
+			comments: false
+        })
+    ]
+};
+const outputOptions2 = {
+    file: './dst/export_ui-builder.min.js',
+    format: 'esm',
+    sourcemap: true
+};
+
 async function build() {
-    const bundle = await rollup.rollup(inputOptions);
+    let bundle = await rollup.rollup(inputOptions);
     await bundle.write(outputOptions);
+
+    bundle = await rollup.rollup(inputOptions2);
+    await bundle.write(outputOptions2);
 }
 
 build();
