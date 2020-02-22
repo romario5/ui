@@ -13,7 +13,6 @@ export default class Styles
         }
     }
 
-
     renderFor(ui, enforce) {
         // Don't do anything if styles already rendered and enforce is not required.
         if (this.cssString !== '' && enforce !== true) {
@@ -34,7 +33,6 @@ export default class Styles
         Styles.headNode.appendChild(this.styleNode);
     }
 
-
     static renderRules(target, selector, rules) {
         let res = selector + " {\n";
         let nestedRes = '';
@@ -51,7 +49,6 @@ export default class Styles
                 nestedRes += Styles.renderRules(target, selector + p, v);
             }
         }
-
         return res + "}\n" + nestedRes;
     }
 }

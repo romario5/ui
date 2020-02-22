@@ -3,7 +3,13 @@
     <head>
         <title>Todo list</title>
         <meta charset="UTF-8">
-        <script src="../dst/ui-builder.min.js"></script>
+        <script src="../dst/ui-scheme.min.js"></script>
+        <script>
+            var UI = UIScheme.UI;    
+            var Scheme = UIScheme.Scheme;    
+            var EventsChannel = UIScheme.EventsChannel;    
+            var Styles = UIScheme.Styles;    
+        </script>
         <script src="input.js"></script>
         <script src="button.js"></script>
         <script src="todo-list.js"></script>
@@ -25,11 +31,12 @@
     </head>
     <body>
 
+        
+
         <div id="todo-list"></div>
 
         <script>
-            let todoList = new TodoList();
-            todoList.appendTo('#todo-list');    
+            let todoList = new TodoList().appendTo('#todo-list');    
         </script>
     </body>
 </html>

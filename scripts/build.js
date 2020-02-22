@@ -3,7 +3,7 @@ const minify = require('rollup-plugin-babel-minify');
 
 // see below for details on the options
 const inputOptions = {
-    input: './src/index.js',
+    input: './src/browser.js',
     plugins: [
         minify({
 			comments: false
@@ -11,23 +11,25 @@ const inputOptions = {
     ]
 };
 const outputOptions = {
-    file: './dst/ui-builder.min.js',
-    format: 'esm',
+    file: './dst/ui-scheme.min.js',
+    format: 'iife',
     sourcemap: true
 };
 
 
+
+
 // see below for details on the options
-const inputOptions2 = {
-    input: './src/export.js',
+const inputOptionsCJS = {
+    input: './src/cjs.js',
     plugins: [
         minify({
 			comments: false
         })
     ]
 };
-const outputOptions2 = {
-    file: './dst/export_ui-builder.min.js',
+const outputOptionsCJS = {
+    file: './dst/ui-scheme.cjs.min.js',
     format: 'cjs',
     sourcemap: true
 };
@@ -36,8 +38,8 @@ async function build() {
     let bundle = await rollup.rollup(inputOptions);
     await bundle.write(outputOptions);
 
-    bundle = await rollup.rollup(inputOptions2);
-    await bundle.write(outputOptions2);
+    bundle = await rollup.rollup(inputOptionsCJS);
+    await bundle.write(outputOptionsCJS);
 }
 
 build();

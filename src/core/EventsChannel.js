@@ -7,7 +7,6 @@ export default class EventsChannel
         this.handlers = {}
     }
 
-
     on(eventName, handler) {
         let arr = eventName.split('->')
         arr.forEach((el, i, a) => a[i] = el.trim())
@@ -17,7 +16,6 @@ export default class EventsChannel
         }
         this.handlers[arr[0]].addHandler(handler, arr.length > 1 ? arr[1] : undefined)
     }
-
 
     off(eventName) {
         let arr = eventName.split('->')
@@ -32,8 +30,6 @@ export default class EventsChannel
         }
     }
 
-
-
     trigger(eventName, ...params) {
         let arr = eventName.split('->')
         arr.forEach((el, i, a) => a[i] = el.trim())
@@ -46,7 +42,6 @@ export default class EventsChannel
             }
         }
     }
-
 
     static get(name) {
     	if (!channels.hasOwnProperty(name)) {
@@ -66,7 +61,6 @@ class HandlersHub
 		this.handlers = []
 		this.ports = {}
     }
-
     
     addHandler(handler, port) {
         if (port === undefined) {
@@ -76,24 +70,20 @@ class HandlersHub
         }
     }
 
-
     removeAllHandlers() {
         this.handlers = []
         this.ports = {}
     }
 
-
     removePortHandler(port) {
         delete(this.ports[port])
     }
-
 
     runPortHandler(port, context, ...params) {
         if (this.ports.hasOwnProperty(port)) {
             this.ports[port].call(context, ...params)
         }
     }
-
 
     runAllHandlers(context, ...params) {
         for (let i = 0; i < this.handlers.length; i++) {

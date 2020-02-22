@@ -14,7 +14,6 @@ let symbolTagName  = Symbol('tagName');
 export default class Scheme
 {
     constructor(selector, data) {
-        // Check if selector is omitted.
         if (typeof selector === 'object') {
             data = selector;
             selector = '';
@@ -37,7 +36,6 @@ export default class Scheme
         if (this[symbolClasses].length > 0) {
             this[symbolSelector] += '.' + this[symbolClasses].join('.');
         }
-    
     }
 
     /**
@@ -46,13 +44,11 @@ export default class Scheme
      * @param {string} [namespace]
      */
     static build(scheme, namespace) {
-        // Check if namespace is omitted.
         if (namespace === undefined) {
             namespace = '';
         } else {
             namespace = '.' + camelCaseToDashSeparated(namespace);
         }
-
 
         // Prepare root element.
         let rootElement = new Element(scheme[symbolSelector] + namespace);
@@ -77,7 +73,6 @@ export default class Scheme
                 rootElement[p] = data[p];
             }
         }
-
         return rootElement;
     }
 }

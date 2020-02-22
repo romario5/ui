@@ -1,2 +1,2 @@
 'use strict';
-module.exports = require('./dst/export_ui-builder.min.js');
+module.exports = require('./dst/ui-scheme.cjs.min.js');

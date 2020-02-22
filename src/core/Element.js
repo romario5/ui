@@ -1,44 +1,57 @@
-import { parseTagName, parseId, parseClassNames, camelCaseToDashSeparated } from '../utils/parsing';
-import EventsChannel from './EventsChannel';
-import generateUniqueId from '../utils/id-generator';
+import { parseTagName, parseId, parseClassNames, camelCaseToDashSeparated } from '../utils/parsing'
+import EventsChannel from './EventsChannel'
 
 
+let elementSymbol  = Symbol()
+let eventsSymbol   = Symbol()
+let extSymbol      = Symbol()
 
-let eventsSymbol   = Symbol();
-let attachedEvents = Symbol();
-let extSymbol      = Symbol();
 
+// Attach events hook to the elements.
 let nativeEvents = [
     'submit', 'abort', 'beforeinput', 'blur', 'click', 'compositionen', 'paste',
     'compositionstart', 'compositionupdate', 'dblclick', 'error', 'focus', 'change',
     'focusin', 'focusout', 'input', 'keydown', 'keypress', 'keyup', 'load',
     'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mousewheel',
     'mouseup', 'resize', 'scroll', 'select', 'unload', 'wheel', 'touchstart', 'touchend', 'touchmove'
-];
-
+]
+function eventHook(event, ...params) {
+    if (event.target.hasOwnProperty(elementSymbol)) {
+        event.target[elementSymbol].trigger(event.type, event, ...params)
+    }
+}
+for (let i = 0, len = nativeEvents.length; i < len; i++) {
+    document.addEventListener(nativeEvents[i], eventHook, {
+        capture: true
+    })
+}
 
 
 export default class Element
 {
     constructor(selector) {
-        this.node = document.createElement(parseTagName(selector));
+        // Create node for the element and save reference to it in hidden property.
+        this.node = document.createElement(parseTagName(selector))
+        this.node[elementSymbol] = this
 
         // Set id.
-        let id = parseId(selector);
+        let id = parseId(selector)
         if (id !== '') {
-            this.node.id = parseId(selector);
+            this.node.id = parseId(selector)
         }
         
         // Set class name.
-        let className = parseClassNames(selector);
+        let className = parseClassNames(selector)
         if (className !== '') {
-            this.node.className = className;
+            this.node.className = className
         }
-        this.selector = selector;
+        this.selector = selector
         
-        this[eventsSymbol]   = new EventsChannel(eventsSymbol);
-        this[extSymbol]      = {};
-        this[attachedEvents] = [];
+        // Note that all native node events will be passed through this channel.
+        this[eventsSymbol] = new EventsChannel(eventsSymbol)
+
+        // Container with applied extensions. Will be replaced with corresponding container.
+        this[extSymbol]    = {}
     }
 
     /**
@@ -51,7 +64,13 @@ export default class Element
      * @param {*} value 
      */
     css(style, value) {
-
+        if (typeof style === 'object') {
+            for (let p in style) {
+                this.node.style[p] = style[p]
+            }
+        } else {
+            this.node.style[style] = value
+        }
     }
 
     /**
@@ -63,14 +82,7 @@ export default class Element
      * @param {function} handler 
      */
     on(eventName, handler) {
-        this[eventsSymbol].on(eventName, handler);
-
-        if (nativeEvents.includes(eventName) && !this[attachedEvents].includes(eventName)) {
-            this[attachedEvents].push(eventName);
-            this.node.addEventListener(eventName, (event) => {
-                this.trigger(eventName, event);
-            });
-        }
+        this[eventsSymbol].on(eventName, handler)
     }
 
     /**
@@ -80,7 +92,7 @@ export default class Element
      * @param {function} [handler]
      */
     off(eventName, handler) {
-
+        this[eventsSymbol].off(eventName, handler)
     }
 
     /**
@@ -90,7 +102,7 @@ export default class Element
      * @param  {...any} data 
      */
     trigger(eventName, ...data) {
-        this[eventsSymbol].trigger(eventName, ...data);
+        this[eventsSymbol].trigger(eventName, ...data)
     }
 
     /**
@@ -102,13 +114,18 @@ export default class Element
      */
     attr(name, value) {
         if (value === undefined) {
-            return this.node.getAttribute(name);
+            return this.node.getAttribute(name)
         }
-        this.node.setAttribute(name, value);
+        this.node.setAttribute(name, value)
     }
 
+    /**
+     * Returns node of the element.
+     * @return {HTMLElement}
+     */
     node() {
-        return this.node;
+        return this.node
     }
 }
 
+Element.symbol = elementSymbol

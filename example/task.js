@@ -37,7 +37,7 @@ class Task extends UI
 
     onRender(params) {
         this.doneFlag.node.setAttribute('type', 'checkbox');
-        this.doneFlag.node.addEventListener('change', () => {
+        this.doneFlag.on('change', () => {
             this.channel.trigger('itemChange', this)
         })
         this.name.node.textContent = params.name;

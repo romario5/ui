@@ -7,10 +7,10 @@ import Element from './Element';
 let eventsSymbol = Symbol();
 
 
-
 export default class UI
 {
     constructor(params) {
+        // Create untitled events channel for the element.
         this[eventsSymbol] = new EventsChannel();
 
         // Purify params.
@@ -25,19 +25,21 @@ export default class UI
             }
         }
 
+        // Run initialization method.
         this.init(this.params)
 
+        // Do all dirty work :)
         this.render(this.params);
         this.createStyles().renderFor(this, false);
     }
 
     /**
      * Allows to initialize additional parameters before rendering.
+     * This method may be overridden in sub-class.
+     * 
      * @param {Object} params 
      */
-    init(params) {
-        // This method may be overridden in sub-class.
-    }
+    init(params) {}
 
     /**
      * Adds event listener.
@@ -48,7 +50,7 @@ export default class UI
      * @param {function} handler 
      */
     on(eventName, handler) {
-        this[eventsSymbol].on(eventName, handler);
+        this[eventsSymbol].on(eventName, handler)
     }
 
     /**
@@ -58,7 +60,7 @@ export default class UI
      * @param {function} [handler]
      */
     off(eventName, handler) {
-        this[eventsSymbol].off(eventName, handler);
+        this[eventsSymbol].off(eventName, handler)
     }
 
     /**
@@ -68,7 +70,7 @@ export default class UI
      * @param  {...any} data 
      */
     trigger(eventName, ...data) {
-        this[eventsSymbol].trigger(eventName, ...data);
+        this[eventsSymbol].trigger(eventName, ...data)
     }
 
     /**
@@ -78,32 +80,29 @@ export default class UI
      * @return {Scheme}
      */
     createScheme() {
-        return new Scheme({
-        
-        });
+        return new Scheme({});
     }
 
     /**
      * Overrides parameters that was defined for rendering.
      * This method called before creating any nodes but after initialization of parameters.
      * 
-     * @param {Object} params 
+     * @param {Object} params
      */
-    onBeforeRender(params) {
-
-    }
+    onBeforeRender(params) {}
 
     /**
      * Handles rendering of the UI.
      * This method called just after instance creation.
      * 
+     * @param {Object} params
+     */
+    onRender(params) {}
+
+    /**
+     * Renders UI with given parameters.
      * @param {Object} params 
      */
-    onRender(params) {
-
-    }
-
-
     render(params) {
         this.onBeforeRender(params);
         this.trigger('beforeRender');
@@ -115,7 +114,6 @@ export default class UI
         } else if (!(scheme instanceof Scheme)) {
             scheme = new Scheme('div', scheme);
         }
-
 
         this.rootElement = Scheme.build(scheme, this.constructor.name);
 
@@ -151,7 +149,6 @@ export default class UI
 
         let targetNode = target;
         if (typeof target === 'string') {
-
             targetNode = document.querySelector(target);
         } else if (target instanceof Element) {
             targetNode = target.node;
@@ -167,12 +164,9 @@ export default class UI
 
     /**
      * This method will be called just after appending.
-     * 
      * @param {string|Element} target 
      */
-    onAppend(target) {
-        
-    }
+    onAppend(target) {}
 
   
 
@@ -182,9 +176,7 @@ export default class UI
      * 
      * @param {Object} data
      */
-    onBeforeLoad(data) {
-        
-    }
+    onBeforeLoad(data) {}
 
     /**
      * Modifies or overrides default loading logic.
@@ -194,9 +186,7 @@ export default class UI
      * @param {Object} data 
      * @param {Event} event
      */
-    onLoad(data, event) {
-       
-    }
+    onLoad(data, event) {}
 
     /**
      * Modifies or overrides default gathering logic.
@@ -205,9 +195,7 @@ export default class UI
      * @param {Object} data 
      * @param {Event} event 
      */
-    onGather(data, event) {
-        
-    }
+    onGather(data, event) {}
 
     /**
      * Returns styles of the UI.
@@ -219,7 +207,12 @@ export default class UI
         return new Styles({});
     }
 
-    
+    /**
+     * Defines initial parameters of the UI.
+     * Can be overridden by sub-class.
+     * 
+     * @return {Object}
+     */
     defaultParams() {
         return {};
     }

@@ -21,7 +21,8 @@ class TodoList extends UI
     }
 
     onRender(params) {
-        this.form.node.addEventListener('submit', event => {
+        this.form.on('submit', event => {
+            console.log(event)
             event.preventDefault();
             let name = this.form.input.val().trim();
             if (name !== '') {
@@ -30,9 +31,9 @@ class TodoList extends UI
             }
         });
 
-        this.channel.on('itemChange -> 1', item => {
-            console.log('Item changed', item)
-        })
+        this.channel.on('itemChange -> 1', task => {
+            console.log('"' + task.getName() + '" has been ' + (task.isDone() ? 'done' : 'undone'));
+        });
 
         this.channel.off('itemChange -> 2')
     }
