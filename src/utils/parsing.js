@@ -66,7 +66,7 @@ export function parseClassNames(selector) {
 }
 
 /**
- * 
+ * Parses ID from the given selector.
  * 
  * @param {string} selector
  * @return {string}
@@ -79,6 +79,26 @@ export function parseId(selector) {
     return '';
 }
 
+/**
+ * Parses attributes from the given selector.
+ * 
+ * @param {Object} selector 
+ */
+export function parseAttributes(selector) {
+    let attr = {}
+    let f = selector.split('[')
+    if (f.length > 1) {
+        f = f.split(']')
+        if (f.length > 0) {
+            f = f.split(/;,/)
+            for (let i = 0; i < f.length; i++) {
+                let a = f[i].split('=')
+                attr[a[0].trim()] = a.length > 1 ? a[1] : ''
+            }
+        }
+    }
+    return attr
+}
 
 
 /**

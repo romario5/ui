@@ -1,36 +1,44 @@
-import Styles from "./Styles";
-import Scheme from "./Scheme";
-import EventsChannel from './EventsChannel';
-import Element from './Element';
+import Styles from "./Styles"
+import Scheme from "./Scheme"
+import Element from './Element'
+import getUniqueId from '../utils/id-generator'
+import { classesArraySymbol, classNameSymbol, eventsSymbol, isStylesRendered } from './symbols'
+import Extendable from './Extendable'
 
 
-let eventsSymbol = Symbol();
-
-
-export default class UI
+export default class UI extends Extendable
 {
     constructor(params) {
-        // Create untitled events channel for the element.
-        this[eventsSymbol] = new EventsChannel();
+        super()
+
+        // Ensure that class name is specified.
+        if (!this.constructor.hasOwnProperty(classNameSymbol)) {
+            this.constructor[classNameSymbol] = getUniqueId()
+        }
 
         // Purify params.
-        let defaultParams = this.defaultParams();
-        this.params = params || {};
-        if (typeof params !== 'object') this.params = {};
+        let defaultParams = this.defaultParams()
+        this.params = typeof params === 'object' ? params : {}
 
         // Copy params from default that are absent in the given.
-        for (let p in defaultParams) {
-            if (!this.params.hasOwnProperty(p)) {
-                this.params[p] = defaultParams[p];
+        if (typeof defaultParams === 'object' && typeof params === 'object') {
+            for (let p in defaultParams) {
+                if (!this.params.hasOwnProperty(p)) {
+                    this.params[p] = defaultParams[p]
+                }
             }
         }
 
         // Run initialization method.
-        this.init(this.params)
+        this.init(...arguments)
 
         // Do all dirty work :)
         this.render(this.params);
-        this.createStyles().renderFor(this, false);
+
+        if (!this.constructor.hasOwnProperty(isStylesRendered)) {
+            this.createStyles().renderFor(this, false)
+            this.constructor[isStylesRendered] = true
+        }
     }
 
     /**
@@ -40,38 +48,6 @@ export default class UI
      * @param {Object} params 
      */
     init(params) {}
-
-    /**
-     * Adds event listener.
-     * Can be used named listeners:
-     * chat.on('newMessage -> tray', function() { // ... });
-     * 
-     * @param {string} eventName 
-     * @param {function} handler 
-     */
-    on(eventName, handler) {
-        this[eventsSymbol].on(eventName, handler)
-    }
-
-    /**
-     * Removes event listener.
-     * 
-     * @param {string} eventName 
-     * @param {function} [handler]
-     */
-    off(eventName, handler) {
-        this[eventsSymbol].off(eventName, handler)
-    }
-
-    /**
-     * Fires event with given name.
-     * 
-     * @param {*} eventName 
-     * @param  {...any} data 
-     */
-    trigger(eventName, ...data) {
-        this[eventsSymbol].trigger(eventName, ...data)
-    }
 
     /**
      * Creates scheme of the UI.
@@ -101,6 +77,7 @@ export default class UI
 
     /**
      * Renders UI with given parameters.
+     * 
      * @param {Object} params 
      */
     render(params) {
@@ -115,7 +92,13 @@ export default class UI
             scheme = new Scheme('div', scheme);
         }
 
-        this.rootElement = Scheme.build(scheme, this.constructor.name);
+        let namespace = scheme[classesArraySymbol].join(' ')
+        if (namespace.length <= 1 || namespace === 'Function') {
+            namespace = this.constructor[classNameSymbol]
+        } else {
+            namespace = ''
+        }
+        this.rootElement = Scheme.build(scheme, namespace);
 
         for (let p in this.rootElement) {
             if (this.rootElement.hasOwnProperty(p) && (this.rootElement[p] instanceof Element || this.rootElement[p] instanceof UI)) {
@@ -138,6 +121,12 @@ export default class UI
         return target;
     }
 
+    /**
+     * Appends UI to the given target.
+     * If target is string it will be considered as CSS selector.
+     * 
+     * @param {string|Element|UI} target 
+     */
     appendTo(target) {
         // Allow user to override target.
         let tmpTarget = this.onBeforeAppend(target);
@@ -164,6 +153,7 @@ export default class UI
 
     /**
      * This method will be called just after appending.
+     * 
      * @param {string|Element} target 
      */
     onAppend(target) {}
@@ -210,10 +200,12 @@ export default class UI
     /**
      * Defines initial parameters of the UI.
      * Can be overridden by sub-class.
+     * Can returns any static object because all properties will be copied in the final params.
+     * IMPORTANT! Nested objects will be copied as references.
      * 
-     * @return {Object}
+     * @return {Object|null}
      */
     defaultParams() {
-        return {};
+        return null;
     }
 }

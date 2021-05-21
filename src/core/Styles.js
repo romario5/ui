@@ -33,6 +33,7 @@ export default class Styles
         Styles.headNode.appendChild(this.styleNode);
     }
 
+
     static renderRules(target, selector, rules) {
         let res = selector + " {\n";
         let nestedRes = '';
@@ -40,13 +41,17 @@ export default class Styles
 
         for (let p in rules) {
             let v = rules[p];
-            if (typeof v === 'string') {
+            if (typeof v === 'string' || typeof v === 'number') {
                 res += prefix + camelCaseToDashSeparated(p) + ': ' + rules[p] + ";\n";
             } else if (target[p]) {
                 let t = target[p] instanceof Element ? target[p] : target[p].rootElement;
                 nestedRes += Styles.renderRules(t, selector + ' > ' + t.selector, v);
-            } else if (p[0] === ':') {
+            } else if (p[0] === ':' || p[0] === '.' || p[0] === '[' || p[0] === '#' || p[0] === ' ' || p[0] === '>') {
                 nestedRes += Styles.renderRules(target, selector + p, v);
+            } else if (p[0] === '@') {
+                nestedRes += Styles.renderRules(target, p, v)
+            } else {
+                res += Styles.renderRules(target, p, v);
             }
         }
         return res + "}\n" + nestedRes;

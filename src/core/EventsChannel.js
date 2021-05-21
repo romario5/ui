@@ -2,8 +2,9 @@ let channels = {}
 
 export default class EventsChannel
 {
-    constructor(name) {
-        this.name = name
+    constructor(context) {
+        this.context = context === undefined ? this : context
+        this.name = null
         this.handlers = {}
     }
 
@@ -36,16 +37,23 @@ export default class EventsChannel
 
         if (this.handlers.hasOwnProperty(arr[0])) {
             if (arr.length > 1 && arr[1].length > 0) {
-                this.handlers[arr[0]].runPortHandler(arr[1], this, ...params)
+                this.handlers[arr[0]].runPortHandler(arr[1], this.context, ...params)
             } else {
-                this.handlers[arr[0]].runAllHandlers(this, ...params)
+                this.handlers[arr[0]].runAllHandlers(this.context, ...params)
             }
         }
     }
 
-    static get(name) {
+    triggerDirect(eventName, ...params) {
+        if (this.handlers.hasOwnProperty(eventName)) {
+            this.handlers[eventName].runAllHandlers(this.context, ...params)
+        }
+    }
+
+    static get(name, context) {
     	if (!channels.hasOwnProperty(name)) {
-    		channels[name] = new EventsChannel(name)
+            channels[name] = new EventsChannel(context)
+            channels[name].name = name
     	}
     	return channels[name]
     }

@@ -1,14 +1,10 @@
 const rollup = require('rollup');
-const minify = require('rollup-plugin-babel-minify');
+const { terser } = require('rollup-plugin-terser');
 
 // see below for details on the options
 const inputOptions = {
     input: './src/browser.js',
-    plugins: [
-        minify({
-			comments: false
-        })
-    ]
+    plugins: [ terser() ]
 };
 const outputOptions = {
     file: './dst/ui-scheme.min.js',
@@ -22,11 +18,7 @@ const outputOptions = {
 // see below for details on the options
 const inputOptionsCJS = {
     input: './src/cjs.js',
-    plugins: [
-        minify({
-			comments: false
-        })
-    ]
+    plugins: [ terser() ]
 };
 const outputOptionsCJS = {
     file: './dst/ui-scheme.cjs.min.js',
@@ -35,11 +27,15 @@ const outputOptionsCJS = {
 };
 
 async function build() {
-    let bundle = await rollup.rollup(inputOptions);
-    await bundle.write(outputOptions);
-
-    bundle = await rollup.rollup(inputOptionsCJS);
-    await bundle.write(outputOptionsCJS);
+    try {
+        let bundle = await rollup.rollup(inputOptions);
+        await bundle.write(outputOptions);
+    
+        bundle = await rollup.rollup(inputOptionsCJS);
+        await bundle.write(outputOptionsCJS);
+    } catch(e) {
+        console.error(e)
+    }
 }
 
 build();

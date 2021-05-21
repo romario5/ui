@@ -7,8 +7,9 @@ class TodoList extends UI
     createScheme() {
         return new Scheme({
             form: new Scheme('form', {
+                spinner: new ui.Spinner(3, 360),
                 input: new Input(),
-                createButton: new Button({text: 'Add'})
+                createButton: new Button('Add')
             }),
             items: 'div'
         });
@@ -46,6 +47,15 @@ class TodoList extends UI
             padding: '2rem',
             boxShadow: '0 0 0.75rem rgba(0,0,0,0.15)',
 
+            '@keyframes spin': {
+                from: {
+                    transform: 'rotate(0deg)'
+                },
+                to: {
+                    transform: 'rotate(360deg)'
+                }
+            },
+
             form: {
                 display: 'flex',
 
@@ -53,6 +63,10 @@ class TodoList extends UI
                     flexGrow: '1',
                     marginBottom: '1rem',
                     marginRight: '1rem'
+                },
+
+                createButton: {
+                    visibility: 'visible'
                 }
             }
         });

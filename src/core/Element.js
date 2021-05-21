@@ -1,57 +1,43 @@
 import { parseTagName, parseId, parseClassNames, camelCaseToDashSeparated } from '../utils/parsing'
-import EventsChannel from './EventsChannel'
+import { elementSymbol, eventsSymbol, extensionsSymbol } from './symbols'
+import Extendable from './Extendable'
 
 
-let elementSymbol  = Symbol()
-let eventsSymbol   = Symbol()
-let extSymbol      = Symbol()
-
-
-// Attach events hook to the elements.
-let nativeEvents = [
-    'submit', 'abort', 'beforeinput', 'blur', 'click', 'compositionen', 'paste',
-    'compositionstart', 'compositionupdate', 'dblclick', 'error', 'focus', 'change',
-    'focusin', 'focusout', 'input', 'keydown', 'keypress', 'keyup', 'load',
-    'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mousewheel',
-    'mouseup', 'resize', 'scroll', 'select', 'unload', 'wheel', 'touchstart', 'touchend', 'touchmove'
-]
-function eventHook(event, ...params) {
-    if (event.target.hasOwnProperty(elementSymbol)) {
-        event.target[elementSymbol].trigger(event.type, event, ...params)
-    }
-}
-for (let i = 0, len = nativeEvents.length; i < len; i++) {
-    document.addEventListener(nativeEvents[i], eventHook, {
-        capture: true
-    })
-}
-
-
-export default class Element
+export default class Element extends Extendable
 {
     constructor(selector) {
+        super()
+
+        let tagName = parseTagName(selector).toLowerCase()
+
         // Create node for the element and save reference to it in hidden property.
-        this.node = document.createElement(parseTagName(selector))
+        this.node = document.createElement(tagName)
         this.node[elementSymbol] = this
 
         // Set id.
         let id = parseId(selector)
         if (id !== '') {
-            this.node.id = parseId(selector)
+            this.node.id = id
         }
         
         // Set class name.
-        let className = parseClassNames(selector)
+        let className = parseClassNames(selector).join(' ')
         if (className !== '') {
             this.node.className = className
         }
-        this.selector = selector
-        
-        // Note that all native node events will be passed through this channel.
-        this[eventsSymbol] = new EventsChannel(eventsSymbol)
+        this.selector = tagName + (id === '' ? '' : '#' + id) + (className === '' ? '' : '.' + className.replace(' ', '.'))
 
-        // Container with applied extensions. Will be replaced with corresponding container.
-        this[extSymbol]    = {}
+        // Define value property for input fields.
+        if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+            Object.defineProperty(this, 'value', {
+                get() {
+                    return this.node.value
+                },
+                set(v) {
+                    this.node.value = v
+                }
+            })
+        }
     }
 
     /**
@@ -71,38 +57,6 @@ export default class Element
         } else {
             this.node.style[style] = value
         }
-    }
-
-    /**
-     * Adds event listener.
-     * Can be used named listeners:
-     * chat.on('newMessage -> tray', function() { // ... });
-     * 
-     * @param {string} eventName 
-     * @param {function} handler 
-     */
-    on(eventName, handler) {
-        this[eventsSymbol].on(eventName, handler)
-    }
-
-    /**
-     * Removes event listener.
-     * 
-     * @param {string} eventName 
-     * @param {function} [handler]
-     */
-    off(eventName, handler) {
-        this[eventsSymbol].off(eventName, handler)
-    }
-
-    /**
-     * Fires event with given name.
-     * 
-     * @param {*} eventName 
-     * @param  {...any} data 
-     */
-    trigger(eventName, ...data) {
-        this[eventsSymbol].trigger(eventName, ...data)
     }
 
     /**
@@ -129,3 +83,40 @@ export default class Element
 }
 
 Element.symbol = elementSymbol
+
+
+
+
+
+// Hook all native events and process them using custom handler.
+// Its necessary to avoid using node property and attach events handler directly to the element.
+// For example inside onRender() method:
+// this.form.on('submit', e => this.sendRequest())
+
+// List of events tht will be hooked
+let nativeEvents = [
+    'submit', 'abort', 'beforeinput', 'blur', 'click', 'compositionen', 'paste',
+    'compositionstart', 'compositionupdate', 'dblclick', 'error', 'focus', 'change',
+    'focusin', 'focusout', 'input', 'keydown', 'keypress', 'keyup', 'load',
+    'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mousewheel',
+    'mouseup', 'resize', 'scroll', 'select', 'unload', 'wheel', 'touchstart', 'touchend', 'touchmove'
+]
+
+// Define custom handler
+function eventHook(event, ...params) {
+    let parent = event.target
+    if (parent.hasOwnProperty(elementSymbol)) {
+        event.targetElement = parent[elementSymbol]
+    }
+    while (parent !== null && parent.hasOwnProperty(elementSymbol)) {
+        parent[elementSymbol][eventsSymbol].triggerDirect(event.type, event, ...params)
+        parent = parent.parentNode
+    }  
+}
+
+// Attach handler
+for (let i = 0, len = nativeEvents.length; i < len; i++) {
+    document.addEventListener(nativeEvents[i], eventHook, {
+        capture: true
+    })
+}

@@ -4,11 +4,8 @@ class Button extends UI
 		return new Scheme('button');
 	}
 
-	defaultParams() {
-		return {
-			text: 'Button',
-			type: 'submit'
-		};
+	init(label) {
+		this.params.text = label
 	}
 
 	onClick(handler) {
@@ -16,6 +13,9 @@ class Button extends UI
 	}
 
 	onRender(params) {
+		this.rootElement.on('click', function() {
+			console.log(this)
+		})
 		this.rootElement.node.textContent = params.text;
 		this.rootElement.node.setAttribute('type', params.type);
 	}

@@ -4,5 +4,5 @@ let counter = 0;
 
 export default function getUniqueId() {
     counter++;
-    return 'id-' + counter;
+    return 'uis-id-' + counter;
 }
